@@ -1,35 +1,90 @@
-# Merch Shop
+<div align="center">
 
-REST API service for an internal merch store where employees purchase items using virtual currency (coins). Features JWT authentication, clean architecture, and load-tested performance at 1000 RPS.
+# 🏪 Merch Shop
 
-[![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat-square&logo=go)](https://golang.org)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
+**REST API for an internal merch store with virtual currency**
 
-## Key Features
+[![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://golang.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
+[![k6](https://img.shields.io/badge/k6-Load_Tested-7D64FF?style=for-the-badge&logo=k6&logoColor=white)](https://k6.io)
 
-- **Merch Marketplace** — 10 items with fixed coin prices, instant purchases
-- **Coin Transfers** — peer-to-peer coin transfers between employees
-- **Transaction History** — full audit trail of purchases and transfers
-- **JWT Authentication** — secure token-based auth with middleware
-- **Clean Architecture** — controllers → services → repositories separation
-- **High Performance** — 1000 RPS with 99.99% responses under 50ms (k6)
-- **Test Coverage** — 53% unit tests + full E2E suite
+<br>
 
-## Tech Stack
+<table>
+<tr>
+<td align="center"><h3>⚡ 1000 RPS</h3><sub>sustained load</sub></td>
+<td align="center"><h3>< 50ms</h3><sub>99.99% latency</sub></td>
+<td align="center"><h3>53%</h3><sub>test coverage</sub></td>
+<td align="center"><h3>0</h3><sub>failed transactions</sub></td>
+</tr>
+</table>
 
-| Component | Technology |
-|-----------|------------|
-| Language | Go 1.23 |
-| Framework | Gin |
-| Database | PostgreSQL |
-| Auth | JWT (bcrypt + token refresh) |
-| Migrations | Goose |
-| Logging | Logrus |
-| Testing | Unit + E2E + k6 load tests |
-| Deploy | Docker + Docker Compose |
+</div>
 
-## Quick Start
+---
+
+## 💡 What It Does
+
+Employees receive **1000 coins** on registration and can:
+
+- 🛒 **Buy merch** — 10 items from t-shirts to hoodies at fixed prices
+- 💸 **Transfer coins** — send coins to colleagues as thanks or gifts
+- 📊 **Track history** — view purchases, incoming and outgoing transfers
+
+All operations are **atomic** — no negative balances, no self-transfers, full audit trail.
+
+---
+
+## 🏗️ Architecture
+
+Built with **Clean Architecture** — easy to extend, test, and maintain:
+
+```
+cmd/                    → Entry point
+internal/
+├── controllers/        → HTTP handlers (Gin)
+├── services/           → Business logic
+├── repositories/       → PostgreSQL queries
+├── models/             → Domain entities
+├── dto/                → Request/Response schemas
+├── middleware/          → JWT auth + request logging
+└── routes/             → API routing
+migrations/             → Goose SQL migrations
+tests/
+├── unit_test/          → Service layer tests (mocks)
+├── e2e/                → Integration tests (real DB)
+└── loadtest.js         → k6 scenario (1000 RPS)
+```
+
+---
+
+## 🔌 API
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `POST` | `/api/auth` | Register / login (auto-creates user) | — |
+| `GET` | `/api/buy/:item` | Purchase merch item | JWT |
+| `POST` | `/api/sendCoin` | Transfer coins to colleague | JWT |
+| `GET` | `/api/info` | Balance + full transaction history | JWT |
+
+---
+
+## 🛠 Tech Stack
+
+| | Technology | Purpose |
+|-|------------|---------|
+| 🔧 | **Go + Gin** | Fast HTTP framework |
+| 🗄 | **PostgreSQL** | Persistent storage with indexes |
+| 🔐 | **JWT + bcrypt** | Auth with password hashing |
+| 📦 | **Docker Compose** | One-command deployment |
+| 🔄 | **Goose** | Database migrations |
+| 📝 | **Logrus** | Structured logging |
+| 🧪 | **k6** | Load testing at 1000 RPS |
+
+---
+
+## 🚀 Quick Start
 
 ```bash
 git clone https://github.com/AlexMayka/merch-shop.git
@@ -37,54 +92,30 @@ cd merch-shop
 docker-compose up --build
 ```
 
-Service available at `http://localhost:8080`
+API available at `http://localhost:8080`
 
-## API Endpoints
+---
 
-| Method | URL | Description | Auth |
-|--------|-----|-------------|------|
-| `POST` | `/api/auth` | Login / register (auto-creates on first login) | No |
-| `GET` | `/api/buy/:item` | Purchase merch item | JWT |
-| `POST` | `/api/sendCoin` | Transfer coins to another employee | JWT |
-| `GET` | `/api/info` | Balance, purchases, transfer history | JWT |
+## 📈 Performance
 
-## Architecture
+Load tested with **k6** at 1000 concurrent RPS:
 
-```
-cmd/                    # Application entry point
-internal/
-├── controllers/        # HTTP request handlers
-├── services/           # Business logic layer
-├── repositories/       # Database access layer
-├── models/             # Data models
-├── dto/                # Request/response objects
-├── middleware/          # JWT auth + logging
-├── routes/             # Route definitions
-└── utils/              # Error handling
-migrations/             # SQL migrations (Goose)
-pkg/                    # Shared packages (DB, JWT, logger)
-tests/
-├── unit_test/          # Unit tests with mocks
-├── e2e/                # Integration tests
-└── loadtest.js         # k6 load test scenario
-```
+| Metric | Result |
+|--------|--------|
+| Throughput | **1000 req/s** sustained |
+| p99.99 latency | **< 50ms** |
+| Failed requests | **0** |
+| Concurrent safety | Verified (no race conditions) |
 
-## Load Test Results
+Optimized SQL queries — aggregating user info in a **single query** instead of N+1.
 
-Tested with k6 at 1000 RPS sustained load:
+---
 
-- **99.99%** of requests completed under **50ms**
-- Zero failed transactions under load
-- Concurrent coin operations remain consistent (no negative balances)
-
-## Running Tests
+## 🧪 Tests
 
 ```bash
-# Unit tests
-go test ./tests/unit_test -v
-
-# E2E tests (requires running DB)
-go test ./tests/e2e -v
+go test ./tests/unit_test -v   # Unit tests
+go test ./tests/e2e -v         # E2E tests (requires DB)
 ```
 
 ## License
